@@ -1,0 +1,9 @@
+apply plugin: 'application'
+
+dependencies {
+    implementation project(':shared')
+}
+
+application {
+    mainClass = 'edu.icesi.sitmmio.v2.Main'
+}
