@@ -9,6 +9,10 @@ data/
 *.csv
 *.pdf
 
+# Excepciones: archivos de docs que sí deben estar en el repositorio.
+!docs/*.csv
+!docs/*.pdf
+
 # Generated experiment outputs.
 results/*.csv
 results/*.log
