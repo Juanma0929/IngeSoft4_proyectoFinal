@@ -51,7 +51,9 @@ public final class ThreadPoolCliParser {
     }
 
     public String usage() {
-        return baseParser.usage().replace(
+        return baseParser.usage()
+                .replace("v1-monolithic:run", "v2-threadpool:run")
+                .replace(
                 "Version 1 is monolithic: local files, single JVM, no concurrency, no distributed components.\n",
                 "  --threads <N>                  Thread pool size. Default: available CPU cores (" + DEFAULT_THREADS + ").\n\n"
                         + "Version 2 uses a fixed ThreadPool (Producer-Consumer pattern).\n"

@@ -97,7 +97,9 @@ public final class V3CliParser {
                 + "Master mode (run once, after all workers are ready):\n"
                 + "  --mode master\n"
                 + "  --workers <host1:port1,host2:port2,...>   Worker addresses (required)\n\n"
-                + baseParser.usage().replace(
+                + baseParser.usage()
+                .replace("v1-monolithic:run", "v3-distributed:run")
+                .replace(
                         "Version 1 is monolithic: local files, single JVM, "
                                 + "no concurrency, no distributed components.\n", "");
     }

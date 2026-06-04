@@ -40,12 +40,12 @@ print_header "datagrams-MiniPilot.csv first row (headerless file)" "$MINI_FILE"
 print_header "datagrams4Pilot.csv" "$PILOT_FILE"
 
 echo "== Running MiniPilot monolithic calculation =="
-./gradlew run --args="--lines $LINES_FILE --datagrams $MINI_FILE --output $RESULTS_DIR/route_month_speeds_minipilot.csv --active-route-col LINEID --datagrams-has-header false --route-index 7 --bus-index 11 --timestamp-index 10 --latitude-index 4 --longitude-index 5 --coordinate-scale 10000000" \
+./gradlew v1-monolithic:run --args="--lines $LINES_FILE --datagrams $MINI_FILE --output $RESULTS_DIR/route_month_speeds_minipilot.csv --active-route-col LINEID --datagrams-has-header false --route-index 7 --bus-index 11 --timestamp-index 10 --latitude-index 4 --longitude-index 5 --coordinate-scale 10000000" \
   2>&1 | tee "$RESULTS_DIR/route_month_speeds_minipilot.log"
 
 echo
 echo "== Running full pilot monolithic calculation =="
-./gradlew run --args="--lines $LINES_FILE --datagrams $PILOT_FILE --output $RESULTS_DIR/route_month_speeds_pilot.csv" \
+./gradlew v1-monolithic:run --args="--lines $LINES_FILE --datagrams $PILOT_FILE --output $RESULTS_DIR/route_month_speeds_pilot.csv --active-route-col LINEID --datagrams-has-header false --route-index 7 --bus-index 11 --timestamp-index 10 --latitude-index 4 --longitude-index 5 --coordinate-scale 10000000" \
   2>&1 | tee "$RESULTS_DIR/route_month_speeds_pilot.log"
 
 echo

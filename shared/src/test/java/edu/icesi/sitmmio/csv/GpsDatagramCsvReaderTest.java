@@ -87,6 +87,21 @@ final class GpsDatagramCsvReaderTest {
     }
 
     @Test
+    void readsDictionaryTimestampFormatWithMonthNameFractionAndAmPm() throws IOException {
+        String csv = "EV,28-MAY-19,STOP,9999,34516000,-765320000,TASK,A01,TRIP,X,"
+                + "30-MAY-19 11.59.59.000000 PM,BUS-1\n";
+
+        GpsDatagramReadResult result = reader.readWithStats(
+                new StringReader(csv),
+                Set.of("A01"),
+                headerlessMiniPilotConfig());
+
+        assertEquals(1, result.cleanedDatagrams().size());
+        assertEquals(Instant.parse("2019-05-30T23:59:59Z"), result.cleanedDatagrams().get(0).timestamp());
+        assertEquals(0, result.skippedInvalidRows());
+    }
+
+    @Test
     void skipsHeaderlessRowsWithTooFewColumnsOrInvalidCoordinates() throws IOException {
         String csv = "EV,2026-05-01T09:00:00Z,STOP,9999,34516000\n"
                 + "EV,2026-05-01T09:00:00Z,STOP,9999,910000000,-765320000,TASK,A01,TRIP,X,"

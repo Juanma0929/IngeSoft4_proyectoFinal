@@ -4,16 +4,34 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoField;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.List;
+import java.util.Locale;
 
 final class TimestampParser {
     private static final List<DateTimeFormatter> LOCAL_FORMATTERS = List.of(
             DateTimeFormatter.ISO_LOCAL_DATE_TIME,
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
             DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"),
-            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"),
+            new DateTimeFormatterBuilder()
+                    .parseCaseInsensitive()
+                    .appendPattern("dd-MMM-")
+                    .appendValueReduced(ChronoField.YEAR, 2, 2, 2000)
+                    .appendPattern(" HH.mm.ss.SSSSSS")
+                    .toFormatter(Locale.ENGLISH)
+                    .withResolverStyle(ResolverStyle.STRICT),
+            new DateTimeFormatterBuilder()
+                    .parseCaseInsensitive()
+                    .appendPattern("dd-MMM-")
+                    .appendValueReduced(ChronoField.YEAR, 2, 2, 2000)
+                    .appendPattern(" hh.mm.ss.SSSSSS a")
+                    .toFormatter(Locale.ENGLISH)
+                    .withResolverStyle(ResolverStyle.STRICT));
 
     private TimestampParser() {
     }

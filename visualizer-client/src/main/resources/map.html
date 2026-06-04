@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SITM-MIO Monitoring</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        #map { height: 100vh; width: 100%; margin: 0; padding: 0; background: #eef3f4; }
+        body { margin: 0; padding: 0; }
+        .leaflet-container { background: #eef3f4; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        var caliBounds = L.latLngBounds(
+            [3.2063329870791391, -76.640625],
+            [3.6011423201587296, -76.376953125]
+        );
+        var map = L.map('map', {
+            minZoom: 11,
+            maxZoom: 17,
+            maxBounds: caliBounds,
+            maxBoundsViscosity: 0.9
+        }).setView([3.42, -76.52], 12); // Cali
+        L.imageOverlay('cali-map-z13.png', caliBounds).addTo(map);
+        fitCaliCover(true);
+
+        var markers = {};
+        var routeHalo = null;
+        var routeLine = null;
+
+        function fitCaliCover(recenter) {
+            var zoom = map.getBoundsZoom(caliBounds, true);
+            map.setMinZoom(zoom);
+            if (recenter) {
+                map.setView(caliBounds.getCenter(), zoom, { animate: false });
+            } else if (map.getZoom() < zoom) {
+                map.setZoom(zoom, { animate: false });
+            }
+            map.panInsideBounds(caliBounds, { animate: false });
+        }
+
+        function clearMap() {
+            Object.keys(markers).forEach(function (busId) {
+                map.removeLayer(markers[busId]);
+            });
+            markers = {};
+            if (routeHalo) {
+                map.removeLayer(routeHalo);
+                routeHalo = null;
+            }
+            if (routeLine) {
+                map.removeLayer(routeLine);
+                routeLine = null;
+            }
+        }
+
+        function centerMap(lat, lng) {
+            var zoom = Math.max(map.getMinZoom(), 13);
+            map.setView([lat, lng], zoom, { animate: false });
+            map.panInsideBounds(caliBounds, { animate: false });
+        }
+
+        function drawRouteLine(points) {
+            if (!points || points.length < 2) {
+                return;
+            }
+            if (routeHalo) {
+                map.removeLayer(routeHalo);
+            }
+            if (routeLine) {
+                map.removeLayer(routeLine);
+            }
+            routeHalo = L.polyline(points, {
+                color: '#1b74d1',
+                weight: 6,
+                opacity: 0.85,
+                lineCap: 'round',
+                lineJoin: 'round'
+            }).addTo(map);
+            routeLine = L.polyline(points, {
+                color: '#d9272e',
+                weight: 2,
+                opacity: 0.95,
+                lineCap: 'round',
+                lineJoin: 'round'
+            }).addTo(map);
+        }
+
+        function updateBus(busId, lat, lng, lineId, time) {
+            if (markers[busId]) {
+                markers[busId].setLatLng([lat, lng]);
+                markers[busId].setPopupContent("<b>Bus:</b> " + busId + "<br><b>Ruta:</b> " + lineId + "<br><b>Hora:</b> " + time);
+            } else {
+                var marker = L.marker([lat, lng], { icon: busIcon(busId) }).addTo(map);
+                marker.bindPopup("<b>Bus:</b> " + busId + "<br><b>Ruta:</b> " + lineId + "<br><b>Hora:</b> " + time);
+                markers[busId] = marker;
+            }
+        }
+
+        function markerSize() {
+            return Math.max(8, 18 - Math.max(0, map.getZoom() - 12) * 2.5);
+        }
+
+        function busIcon(busId) {
+            var size = markerSize();
+            var fontSize = Math.max(8, Math.round(size * 0.45));
+            return L.divIcon({
+                className: '',
+                iconSize: [size, size],
+                iconAnchor: [size / 2, size / 2],
+                popupAnchor: [0, -size / 2],
+                html: '<div style="' +
+                    'width:' + size + 'px;height:' + size + 'px;' +
+                    'border-radius:50%;background:#2f8ed8;border:2px solid #0d5f9f;' +
+                    'box-shadow:0 2px 5px rgba(0,0,0,0.25);' +
+                    'color:white;font:bold ' + fontSize + 'px Arial;' +
+                    'line-height:' + size + 'px;text-align:center;' +
+                    '">' + busId.toString().slice(-2) + '</div>'
+            });
+        }
+
+        function rescaleBusMarkers() {
+            Object.keys(markers).forEach(function (busId) {
+                markers[busId].setIcon(busIcon(busId));
+            });
+        }
+
+        map.on('zoomend', rescaleBusMarkers);
+
+        setTimeout(function () {
+            map.invalidateSize(true);
+            fitCaliCover(false);
+        }, 500);
+
+        window.addEventListener('resize', function () {
+            map.invalidateSize(true);
+            fitCaliCover(false);
+        });
+    </script>
+</body>
+</html>

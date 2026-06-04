@@ -63,7 +63,8 @@ public final class CliParser {
 
     public String usage() {
         return "Usage:\n"
-                + "  ./gradlew run --args=\"--lines <path> --datagrams <path> --output <path> [options]\"\n\n"
+                + "  .\\gradlew.bat v1-monolithic:run --args=\"--lines <path> --datagrams <path> "
+                + "--output <path> [options]\"\n\n"
                 + "Required:\n"
                 + "  --lines <path>                 Active routes CSV path\n"
                 + "  --datagrams <path>             GPS datagrams CSV path\n"

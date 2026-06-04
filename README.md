@@ -61,12 +61,22 @@ sitm-mio-speed/
 ├── v1-monolithic/        Versión 1 — procesamiento secuencial
 ├── v2-threadpool/        Versión 2 — concurrente con ThreadPool
 ├── v3-distributed/       Versión 3 — distribuida con Java RMI
+├── visualizer-client/    Bono — visualización Java de recorridos
 │
 ├── docs/
 │   ├── dictionary.md          Diccionario de datos del CSV
 │   ├── enunciado.md           Enunciado del proyecto
-│   ├── deployment-v3.md       Diagrama de deployment (PlantUML)
+│   ├── calculation-assumptions.md
+│   ├── architecture-drivers.md
+│   ├── patterns-and-styles.md
+│   ├── deployment-v3.md       Diagrama de deployment
+│   ├── experimental-validation.md
 │   └── datagrams-MiniPilot.csv  Dataset piloto local
+│
+├── specs/001-monolithic-average-speed/
+│   ├── spec.md
+│   ├── plan.md
+│   └── tasks.md
 │
 ├── results/              Salidas generadas (ignoradas por Git)
 └── scripts/
@@ -93,7 +103,7 @@ Procesa todo de forma secuencial en un único hilo: lee el CSV completo, ordena 
 ### Cómo correrlo
 
 ```powershell
-.\gradlew v1-monolithic:run --args="--lines docs/lines-241-ActiveGT.csv --datagrams docs/datagrams-MiniPilot.csv --output results/v1-local.csv --active-route-col LINEID --datagrams-has-header false --route-index 7 --bus-index 11 --timestamp-index 10 --latitude-index 4 --longitude-index 5 --coordinate-scale 10000000"
+.\gradlew.bat v1-monolithic:run --args="--lines docs/lines-241-ActiveGT.csv --datagrams docs/datagrams-MiniPilot.csv --output results/v1-local.csv --active-route-col LINEID --datagrams-has-header false --route-index 7 --bus-index 11 --timestamp-index 10 --latitude-index 4 --longitude-index 5 --coordinate-scale 10000000"
 ```
 
 ---
@@ -120,10 +130,10 @@ Con ~188k datagramas el overhead del pool supera el tiempo de cómputo. El speed
 
 ```powershell
 # Hilos por defecto (= núcleos del CPU)
-.\gradlew v2-threadpool:run --args="--lines docs/lines-241-ActiveGT.csv --datagrams docs/datagrams-MiniPilot.csv --output results/v2-local.csv --active-route-col LINEID --datagrams-has-header false --route-index 7 --bus-index 11 --timestamp-index 10 --latitude-index 4 --longitude-index 5 --coordinate-scale 10000000"
+.\gradlew.bat v2-threadpool:run --args="--lines docs/lines-241-ActiveGT.csv --datagrams docs/datagrams-MiniPilot.csv --output results/v2-local.csv --active-route-col LINEID --datagrams-has-header false --route-index 7 --bus-index 11 --timestamp-index 10 --latitude-index 4 --longitude-index 5 --coordinate-scale 10000000"
 
 # Con número explícito de hilos
-.\gradlew v2-threadpool:run --args="... --threads 8"
+.\gradlew.bat v2-threadpool:run --args="... --threads 8"
 ```
 
 ---
@@ -147,16 +157,34 @@ Distribuye el cálculo entre tres servidores. El Master divide las rutas activas
 
 **Terminal 1 — Worker:**
 ```powershell
-.\gradlew v3-distributed:run --args="--mode worker --port 1099"
+.\gradlew.bat v3-distributed:run --args="--mode worker --port 1099"
 ```
 Espera hasta ver: `Worker RMI server ready on port 1099 — waiting for master...`
 
 **Terminal 2 — Master:**
 ```powershell
-.\gradlew v3-distributed:run --args="--mode master --workers localhost:1099 --lines docs/lines-241-ActiveGT.csv --datagrams docs/datagrams-MiniPilot.csv --output results/v3-local.csv --active-route-col LINEID --datagrams-has-header false --route-index 7 --bus-index 11 --timestamp-index 10 --latitude-index 4 --longitude-index 5 --coordinate-scale 10000000"
+.\gradlew.bat v3-distributed:run --args="--mode master --workers localhost:1099 --lines docs/lines-241-ActiveGT.csv --datagrams docs/datagrams-MiniPilot.csv --output results/v3-local.csv --active-route-col LINEID --datagrams-has-header false --route-index 7 --bus-index 11 --timestamp-index 10 --latitude-index 4 --longitude-index 5 --coordinate-scale 10000000"
 ```
 
 Cuando el master termine, cierra la Terminal 1 con `Ctrl+C`.
+
+---
+
+## Bono — Visualización JavaFX de recorridos
+
+La visualización interactiva está en el módulo `visualizer-client`. Sigue el enfoque del repositorio
+base del profesor: una aplicación JavaFX con `WebView` que carga `map.html` y Leaflet. El mapa
+conserva el estilo del profesor con Leaflet y la función `updateBus(...)`, pero usa una imagen local
+fija de Cali para evitar parches grises por fallos de tiles en WebView. Java lo alimenta con nuestros
+datagramas reales del MiniPilot, dibuja la ruta seleccionada y muestra arriba los resultados de
+velocidad por ruta.
+
+```powershell
+.\gradlew.bat visualizer-client:run
+```
+
+Si no existe `results/v1-final-review.csv`, ejecuta primero la versión monolítica local documentada
+en la sección de Versión 1.
 
 ### Despliegue en servidores universitarios
 
@@ -245,14 +273,17 @@ Solo edita las 5 variables al inicio de `scripts/deploy-v3.sh`:
 
 ```powershell
 # Compilar y testear todo
-.\gradlew build
+.\gradlew.bat build
 
 # Solo compilar
-.\gradlew assemble
+.\gradlew.bat assemble
 
 # Solo tests
-.\gradlew test
+.\gradlew.bat test
 
 # Generar distribución ejecutable de v3
-.\gradlew v3-distributed:installDist
+.\gradlew.bat v3-distributed:installDist
+
+# Ejecutar visualización Java
+.\gradlew.bat visualizer-client:run
 ```
