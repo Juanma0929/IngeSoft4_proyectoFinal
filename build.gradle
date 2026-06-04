@@ -26,4 +26,10 @@ subprojects {
     tasks.named('test') {
         useJUnitPlatform()
     }
+
+    // Todos los run tasks usan el directorio raíz como working directory,
+    // así las rutas relativas como docs/ y results/ funcionan desde cualquier módulo.
+    tasks.withType(JavaExec).configureEach {
+        workingDir = rootProject.projectDir
+    }
 }
