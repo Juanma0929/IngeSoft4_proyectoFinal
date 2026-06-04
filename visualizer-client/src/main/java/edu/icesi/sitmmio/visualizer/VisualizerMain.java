@@ -241,6 +241,15 @@ public final class VisualizerMain extends Application {
         if (!speeds.toFile().isFile()) {
             speeds = root.resolve("results").resolve("v1-review.csv");
         }
+        if (!speeds.toFile().isFile()) {
+            speeds = root.resolve("results").resolve("v1-local.csv");
+        }
+        if (!speeds.toFile().isFile()) {
+            speeds = root.resolve("results").resolve("v2-local.csv");
+        }
+        if (!speeds.toFile().isFile()) {
+            speeds = root.resolve("results").resolve("v3-local.csv");
+        }
         return new VisualizationDataLoader(lines, datagrams, speeds).loadRoutes();
     }
 
